@@ -3,19 +3,16 @@ import os
 import tempfile
 from dotenv import load_dotenv
 from langchain import PromptTemplate, LLMChain
-from langchain.llms import OpenAI
-#from langchain_openai import AzureOpenAI
+from langchain_openai import AzureOpenAI
 from config import WHITE, GREEN, RESET_COLOR, model_name
 from utils import format_user_question
 from file_processing import clone_github_repo, load_and_index_files
 from questions import ask_question, QuestionContext
 
 load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-#OPENAI_API_TYPE = os.getenv("OPENAI_API_TYPE")
-#OPENAI_API_VERSION = os.getenv("OPENAI_API_VERSION")
-#OPENAI_API_BASE = os.getenv("OPENAI_API_BASE")
-
+openai_api_key = os.getenv("OPENAI_API_KEY")
+openai_api_version = os.getenv("OPENAI_API_VERSION")
+openai_api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
 
 def main():
     github_url = input("Enter the GitHub URL of the repository: ")
@@ -29,16 +26,13 @@ def main():
                 exit()
 
             print("Repository cloned. Indexing files...")
-            llm = OpenAI(api_key=OPENAI_API_KEY, temperature=0.2)
-            #llm = AzureOpenAI(
-                #openai_api_key=OPENAI_API_KEY,
-                #openai_api_type=OPENAI_API_TYPE,
-                #deployment_name="gpt-35-turbo-16k",
-                #openai_api_version=OPENAI_API_VERSION,
-                #openai_api_base=OPENAI_API_BASE,
-                #model_name=model_name,                
-                #temperature=0.2
-                #)
+            
+            llm = AzureOpenAI(
+                azure_deployment="gpt-35-turbo",
+                azure_endpoint="https://openaiyoda2.openai.azure.com/",
+                openai_api_version=openai_api_version,          
+                temperature=0.2
+                )
 
             template = """
             Repo: {repo_name} ({github_url}) | Conv: {conversation_history} | Docs: {numbered_documents} | Q: {question} | FileCount: {file_type_counts} | FileNames: {filenames}
@@ -64,6 +58,7 @@ def main():
 
             conversation_history = ""
             question_context = QuestionContext(index, documents, llm_chain, model_name, repo_name, github_url, conversation_history, file_type_counts, filenames)
+            
             while True:
                 try:
                     user_question = input("\n" + WHITE + "Ask a question about the repository (type 'exit()' to quit): " + RESET_COLOR)
