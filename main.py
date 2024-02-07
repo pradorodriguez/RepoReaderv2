@@ -2,7 +2,8 @@
 import os
 import tempfile
 from dotenv import load_dotenv
-from langchain import PromptTemplate, LLMChain
+from langchain.chains import LLMChain
+from langchain_core.prompts import PromptTemplate
 from langchain_openai import AzureOpenAI
 from config import WHITE, GREEN, RESET_COLOR, model_name
 from utils import format_user_question
