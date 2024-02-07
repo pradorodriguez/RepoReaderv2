@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from langchain.chains import LLMChain
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import AzureOpenAI
-from config import WHITE, GREEN, RESET_COLOR, model_name
+from config import WHITE, GREEN, RESET_COLOR
 from utils import format_user_question
 from file_processing import clone_github_repo, load_and_index_files
 from questions import ask_question, QuestionContext
@@ -14,6 +14,7 @@ load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 openai_api_version = os.getenv("OPENAI_API_VERSION")
 openai_api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
+model_name = os.getenv("AZURE_DEPLOYMENT_NAME")
 
 def main():
     github_url = input("Enter the GitHub URL of the repository: ")
@@ -29,8 +30,8 @@ def main():
             print("Repository cloned. Indexing files...")
             
             llm = AzureOpenAI(
-                azure_deployment="gpt-35-turbo",
-                azure_endpoint="https://openaiyoda2.openai.azure.com/",
+                azure_deployment=model_name,
+                azure_endpoint=openai_api_base,
                 openai_api_version=openai_api_version,          
                 temperature=0.2
                 )
